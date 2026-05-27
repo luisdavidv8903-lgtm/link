@@ -1,6 +1,0 @@
-name = "link-credit"
-compatibility_date = "2024-01-01"
-
-[[kv_namespaces]]
-binding = "DATA"
-id = "0a50f493a1144995b9521f62d871cfc8"
