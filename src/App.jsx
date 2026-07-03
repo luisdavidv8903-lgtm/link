@@ -93,6 +93,126 @@ const MAX_TOKENS = 1000
 // Defaults to the same-origin Pages Function/Worker route. Override at build
 // time with VITE_CHAT_API_URL if the Worker is deployed to a workers.dev URL.
 const CHAT_API_URL = import.meta.env.VITE_CHAT_API_URL || '/api/chat'
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
+
+const ASSESSMENT_INITIAL = {
+  business_name: '',
+  owner_name: '',
+  email: '',
+  phone: '',
+  state: '',
+  industry: '',
+  llc: '',
+  ein: '',
+  uei: '',
+  sam: '',
+  capability_statement: '',
+  government_experience: '',
+}
+
+const ASSESSMENT_STEPS = [
+  { title: 'Business Profile', fields: ['business_name', 'owner_name'] },
+  { title: 'Contact Details', fields: ['email', 'phone', 'state'] },
+  { title: 'Company Setup', fields: ['industry', 'llc', 'ein'] },
+  { title: 'Federal Readiness', fields: ['uei', 'sam', 'capability_statement'] },
+  { title: 'Experience', fields: ['government_experience'] },
+]
+
+const FIELD_LABELS = {
+  business_name: 'Business Name',
+  owner_name: 'Owner Name',
+  email: 'Email',
+  phone: 'Phone',
+  state: 'State',
+  industry: 'Industry',
+  llc: 'Do you have an LLC?',
+  ein: 'Do you have an EIN?',
+  uei: 'Do you have a UEI?',
+  sam: 'Are you registered in SAM.gov?',
+  capability_statement: 'Do you have a Capability Statement?',
+  government_experience: 'Have you ever won a government contract?',
+}
+
+const BOOLEAN_FIELDS = ['llc', 'ein', 'uei', 'sam', 'capability_statement', 'government_experience']
+
+function boolFromAnswer(value) {
+  return value === 'yes'
+}
+
+function calculateReadinessScore(values) {
+  const weights = {
+    llc: 15,
+    ein: 15,
+    uei: 20,
+    sam: 20,
+    capability_statement: 15,
+    government_experience: 15,
+  }
+
+  return Object.entries(weights).reduce((score, [field, weight]) => (
+    score + (boolFromAnswer(values[field]) ? weight : 0)
+  ), 0)
+}
+
+function getRecommendations(values) {
+  const recommendations = [
+    !boolFromAnswer(values.llc) && 'Form or confirm your LLC so your business is ready for vendor registration.',
+    !boolFromAnswer(values.ein) && 'Get an EIN from the IRS before starting federal vendor setup.',
+    !boolFromAnswer(values.uei) && 'Request a UEI so your business can be identified in federal systems.',
+    !boolFromAnswer(values.sam) && 'Complete SAM.gov registration to become eligible for federal awards.',
+    !boolFromAnswer(values.capability_statement) && 'Create a concise capability statement tailored to federal buyers.',
+    !boolFromAnswer(values.government_experience) && 'Start with smaller opportunities, subcontracting, or set-aside research to build past performance.',
+  ].filter(Boolean)
+
+  const nextSteps = [
+    'Validate your NAICS codes against real federal opportunities.',
+    'Build an opportunity watchlist for agencies buying in your industry.',
+    'Prepare a short outreach plan for contracting officers and prime contractors.',
+    'Review certifications that may improve your competitive position.',
+    'Book a strategy call to prioritize your fastest path to market.',
+  ]
+
+  return [...recommendations, ...nextSteps].slice(0, 5)
+}
+
+async function submitGovernmentLead(values, score) {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    throw new Error('Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.')
+  }
+
+  const payload = {
+    business_name: values.business_name.trim(),
+    owner_name: values.owner_name.trim(),
+    email: values.email.trim(),
+    phone: values.phone.trim(),
+    state: values.state.trim(),
+    industry: values.industry.trim(),
+    llc: boolFromAnswer(values.llc),
+    ein: boolFromAnswer(values.ein),
+    uei: boolFromAnswer(values.uei),
+    sam: boolFromAnswer(values.sam),
+    capability_statement: boolFromAnswer(values.capability_statement),
+    government_experience: boolFromAnswer(values.government_experience),
+    score,
+  }
+
+  const res = await fetch(`${SUPABASE_URL.replace(/\/$/, '')}/rest/v1/government_leads`, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=minimal',
+    },
+    body: JSON.stringify(payload),
+  })
+
+  if (!res.ok) {
+    const detail = await res.text().catch(() => '')
+    throw new Error(detail || `Supabase submission failed with status ${res.status}.`)
+  }
+}
 
 const SYSTEM_PROMPT = `You are the virtual assistant for DELIVERYLINK LLC, a Florida-based AI platform for government contracting readiness and opportunity intelligence. Respond in English by default. Switch to Spanish immediately if the user writes in Spanish or requests it.
 
@@ -166,6 +286,185 @@ function IconCard({ icon: Icon, title, desc }) {
       <h3 className="font-bold text-lg text-slate-800 mb-1">{title}</h3>
       {desc && <div className="text-slate-500 text-sm leading-relaxed">{desc}</div>}
     </div>
+  )
+}
+
+function TextInput({ id, value, onChange, type = 'text', placeholder }) {
+  return (
+    <label htmlFor={id} className="block">
+      <span className="block text-sm font-semibold text-slate-700 mb-2">{FIELD_LABELS[id]}</span>
+      <input id={id} type={type} value={value} required placeholder={placeholder}
+        onChange={e => onChange(id, e.target.value)}
+        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-800 outline-none transition focus:border-brand focus:ring-4 focus:ring-blue-50"
+      />
+    </label>
+  )
+}
+
+function YesNoField({ id, value, onChange }) {
+  return (
+    <fieldset>
+      <legend className="block text-sm font-semibold text-slate-700 mb-3">{FIELD_LABELS[id]}</legend>
+      <div className="grid grid-cols-2 gap-3">
+        {['yes', 'no'].map(option => (
+          <button key={option} type="button" onClick={() => onChange(id, option)}
+            className={`rounded-xl border px-4 py-3 text-sm font-semibold transition ${
+              value === option
+                ? 'border-brand-dark bg-brand-dark text-white shadow-lg shadow-brand-dark/15'
+                : 'border-slate-200 bg-white text-slate-600 hover:border-brand'
+            }`}>
+            {option === 'yes' ? 'Yes' : 'No'}
+          </button>
+        ))}
+      </div>
+    </fieldset>
+  )
+}
+
+function ReadinessAssessment() {
+  const [step, setStep] = useState(0)
+  const [values, setValues] = useState(ASSESSMENT_INITIAL)
+  const [status, setStatus] = useState('idle')
+  const [error, setError] = useState('')
+  const [result, setResult] = useState(null)
+  const activeStep = ASSESSMENT_STEPS[step]
+  const progress = Math.round(((step + 1) / ASSESSMENT_STEPS.length) * 100)
+
+  const updateValue = (field, value) => {
+    setValues(prev => ({ ...prev, [field]: value }))
+    setError('')
+  }
+
+  const stepIsValid = activeStep.fields.every(field => values[field].trim())
+  const nextStep = () => {
+    if (!stepIsValid) {
+      setError('Complete every field in this step before continuing.')
+      return
+    }
+    setStep(prev => Math.min(prev + 1, ASSESSMENT_STEPS.length - 1))
+  }
+
+  const submitAssessment = async (event) => {
+    event.preventDefault()
+    if (!stepIsValid) {
+      setError('Complete every field in this step before submitting.')
+      return
+    }
+
+    const score = calculateReadinessScore(values)
+    setStatus('submitting')
+    setError('')
+
+    try {
+      await submitGovernmentLead(values, score)
+      setResult({ score, recommendations: getRecommendations(values) })
+      setStatus('submitted')
+    } catch (err) {
+      setStatus('idle')
+      setError(err.message)
+    }
+  }
+
+  if (result) {
+    return (
+      <div id="assessment-form" className="mt-12 bg-gradient-to-br from-slate-50 to-blue-50/30 rounded-2xl border border-slate-200 p-6 md:p-8">
+        <div className="grid lg:grid-cols-[0.8fr_1.2fr] gap-8 items-start">
+          <div>
+            <span className="inline-block px-4 py-1.5 bg-blue-50 text-brand-dark text-sm font-semibold rounded-full mb-4">
+              Government Readiness Score
+            </span>
+            <h3 className="text-3xl font-bold text-slate-900 mb-3">Your score:</h3>
+            <div className="flex items-end gap-2 mb-4">
+              <span className="text-6xl font-extrabold text-brand-dark">{result.score}</span>
+              <span className="text-2xl font-bold text-slate-400 mb-2">/100</span>
+            </div>
+            <p className="text-slate-500 leading-relaxed">
+              Your submission was saved. Use these recommendations to prioritize the fastest path toward federal readiness.
+            </p>
+          </div>
+
+          <div className="bg-white rounded-2xl border border-slate-100 p-6">
+            <h4 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
+              <CheckCircle size={18} className="text-green-500" /> Top 5 recommendations
+            </h4>
+            <ol className="space-y-3">
+              {result.recommendations.map((rec, i) => (
+                <li key={i} className="flex gap-3 text-sm text-slate-600 leading-relaxed">
+                  <span className="w-6 h-6 rounded-lg bg-blue-50 text-brand-dark font-bold flex items-center justify-center flex-shrink-0">
+                    {i + 1}
+                  </span>
+                  <span>{rec}</span>
+                </li>
+              ))}
+            </ol>
+            <a href={`mailto:${COMPANY.email}?subject=Free%20Government%20Strategy%20Call&body=Hi%20Luis%2C%20I%20completed%20the%20readiness%20assessment%20and%20my%20score%20was%20${result.score}%2F100.%20I%20would%20like%20to%20book%20a%20free%20strategy%20call.`}
+              className="mt-6 inline-flex w-full items-center justify-center gap-2 bg-brand-dark hover:bg-brand text-white font-semibold px-6 py-3 rounded-xl transition text-base shadow-lg shadow-brand-dark/20">
+              Book a Free Strategy Call <ArrowRight size={18} />
+            </a>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <form id="assessment-form" onSubmit={submitAssessment}
+      className="mt-12 bg-gradient-to-br from-slate-50 to-blue-50/30 rounded-2xl border border-slate-200 p-6 md:p-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div>
+          <p className="text-sm font-semibold text-brand-dark mb-1">Step {step + 1} of {ASSESSMENT_STEPS.length}</p>
+          <h3 className="text-2xl font-bold text-slate-900">{activeStep.title}</h3>
+        </div>
+        <div className="md:w-72">
+          <div className="flex items-center justify-between text-xs font-semibold text-slate-500 mb-2">
+            <span>Progress</span>
+            <span>{progress}%</span>
+          </div>
+          <div className="h-3 rounded-full bg-white border border-slate-200 overflow-hidden">
+            <div className="h-full rounded-full bg-gradient-to-r from-brand-dark to-brand transition-all duration-300"
+              style={{ width: `${progress}%` }} />
+          </div>
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-5">
+        {activeStep.fields.map(field => (
+          BOOLEAN_FIELDS.includes(field) ? (
+            <YesNoField key={field} id={field} value={values[field]} onChange={updateValue} />
+          ) : (
+            <TextInput key={field} id={field} value={values[field]} onChange={updateValue}
+              type={field === 'email' ? 'email' : field === 'phone' ? 'tel' : 'text'}
+              placeholder={field === 'state' ? 'FL' : field === 'industry' ? 'Construction, IT, cleaning, logistics...' : ''}
+            />
+          )
+        ))}
+      </div>
+
+      {error && (
+        <div className="mt-6 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+          {error}
+        </div>
+      )}
+
+      <div className="flex flex-wrap justify-between gap-4 mt-8">
+        <button type="button" onClick={() => setStep(prev => Math.max(prev - 1, 0))} disabled={step === 0 || status === 'submitting'}
+          className="inline-flex items-center gap-2 border-2 border-slate-200 hover:border-brand text-slate-700 font-semibold px-6 py-3 rounded-xl transition text-base disabled:opacity-40 disabled:pointer-events-none">
+          Back
+        </button>
+
+        {step < ASSESSMENT_STEPS.length - 1 ? (
+          <button type="button" onClick={nextStep}
+            className="inline-flex items-center gap-2 bg-brand-dark hover:bg-brand text-white font-semibold px-6 py-3 rounded-xl transition text-base shadow-lg shadow-brand-dark/20">
+            Continue <ArrowRight size={18} />
+          </button>
+        ) : (
+          <button type="submit" disabled={status === 'submitting'}
+            className="inline-flex items-center gap-2 bg-brand-dark hover:bg-brand text-white font-semibold px-6 py-3 rounded-xl transition text-base shadow-lg shadow-brand-dark/20 disabled:opacity-60">
+            {status === 'submitting' ? 'Saving...' : 'Get My Score'} <ArrowRight size={18} />
+          </button>
+        )}
+      </div>
+    </form>
   )
 }
 
@@ -571,7 +870,7 @@ export default function App() {
               Discover in minutes if your business is ready to compete for U.S. federal contracts. Get an AI-powered readiness assessment and opportunity intelligence.
             </p>
             <div className="flex flex-wrap gap-4 animate-fadeInUp delay-300">
-              <a href="#readiness"
+              <a href="#assessment-form"
                 className="inline-flex items-center gap-2 bg-brand-dark hover:bg-brand text-white font-semibold px-6 py-3 rounded-xl transition text-base shadow-lg shadow-brand-dark/20">
                 Start Free Government Readiness Assessment <ArrowRight size={18} />
               </a>
@@ -602,11 +901,13 @@ export default function App() {
           </div>
 
           <div className="text-center mt-10">
-            <a href="#contact"
+            <a href="#assessment-form"
               className="inline-flex items-center gap-2 bg-brand-dark hover:bg-brand text-white font-semibold px-6 py-3 rounded-xl transition text-base shadow-lg shadow-brand-dark/20">
               Analyze My Business <ArrowRight size={18} />
             </a>
           </div>
+
+          <ReadinessAssessment />
         </div>
       </section>
 
@@ -629,7 +930,7 @@ export default function App() {
               </div>
 
               <div className="flex flex-wrap md:flex-col gap-4">
-                <a href="#readiness"
+                <a href="#assessment-form"
                   className="inline-flex items-center justify-center gap-2 bg-brand-dark hover:bg-brand text-white font-semibold px-6 py-3 rounded-xl transition text-base shadow-lg shadow-brand-dark/20">
                   Learn More <ArrowRight size={18} />
                 </a>
@@ -714,7 +1015,7 @@ export default function App() {
             subtitle="Get your free AI readiness assessment today." />
 
           <div className="flex flex-wrap justify-center gap-4 mb-12">
-            <a href={`mailto:${COMPANY.email}?subject=Start%20Assessment`}
+            <a href="#assessment-form"
               className="inline-flex items-center gap-2 bg-brand-dark hover:bg-brand text-white font-semibold px-6 py-3 rounded-xl transition text-base shadow-lg shadow-brand-dark/20">
               Start Assessment <ArrowRight size={18} />
             </a>
