@@ -1,0 +1,25 @@
+name = "deliverylink-chat-api"
+main = "worker/chat-worker.js"
+compatibility_date = "2024-09-23"
+
+# Option A (recommended): route the Worker on the same domain/path the
+# frontend already calls ("/api/chat"). Cloudflare Worker Routes take
+# priority over Pages Functions for a matching path, so this requires
+# NO frontend change and avoids cross-origin requests entirely.
+# Uncomment and adjust if deliverylinktech.com's zone is on this account:
+#
+# routes = [
+#   { pattern = "deliverylinktech.com/api/chat", zone_name = "deliverylinktech.com" }
+# ]
+
+# Option B: deploy to the default *.workers.dev subdomain instead.
+# After `wrangler deploy` the URL will be printed, e.g.:
+#   https://deliverylink-chat-api.<your-subdomain>.workers.dev
+# If you use this option, set VITE_CHAT_API_URL in the frontend build
+# (see .env.example) to that URL plus "/" (the worker handles all paths).
+
+[vars]
+ALLOWED_ORIGIN = "https://deliverylinktech.com"
+
+# Set the required secret with:
+#   wrangler secret put ANTHROPIC_API_KEY

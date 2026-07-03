@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>DELIVERYLINK LLC — Capability Statement</title>
+<meta name="hz:slide-selector" content=".page" />
+<meta name="hz:canvas-width" content="816" />
+<meta name="hz:canvas-height" content="1056" />
+<link rel="stylesheet" href="https://use.typekit.net/akz5qrg.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    display: flex;
+    justify-content: center;
+    background: #e2e8f0;
+  }
+
+  .page {
+    position: relative;
+    width: 8.5in;
+    height: 11in;
+    background: #ffffff;
+    overflow: hidden;
+    font-family: "source-sans-3", sans-serif;
+    color: #1e293b;
+  }
+
+  .heading {
+    font-family: "source-serif-4", serif;
+    font-weight: 700;
+  }
+
+  .content {
+    padding: 0.5in 0.55in 0 0.55in;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .brand-row { display: flex; align-items: center; gap: 12px; }
+  .mark {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: linear-gradient(135deg, #1B4F8A, #2E75B6);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .company-name { font-size: 26pt; letter-spacing: 0.3px; }
+  .tagline {
+    font-size: 12pt; color: #475569; font-weight: 400; margin-top: 6px;
+  }
+  .cap-badge {
+    font-family: "source-sans-3", sans-serif;
+    font-weight: 700; font-size: 9pt; letter-spacing: 1.2px;
+    color: #1B4F8A; background: #DBEAFE;
+    padding: 6px 14px; border-radius: 999px; white-space: nowrap;
+  }
+
+  .divider {
+    height: 4px; margin-top: 16px;
+    background: linear-gradient(90deg, #1B4F8A, #2E75B6);
+  }
+
+  /* Two-column body */
+  .cols { display: flex; gap: 0.45in; margin-top: 30px; align-items: stretch; }
+  .col-left {
+    width: 2.95in;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 16px 16px;
+  }
+  .col-right { flex: 1; padding-top: 4px; }
+
+  .section { margin-bottom: 17px; }
+  .section-title {
+    font-size: 11.5pt; font-weight: 700; letter-spacing: 0.8px;
+    color: #1B4F8A; text-transform: uppercase;
+    border-bottom: 1.5px solid #cbd5e1; padding-bottom: 5px; margin-bottom: 10px;
+  }
+
+  .info-row { font-size: 10.2pt; line-height: 1.55; color: #334155; }
+  .info-label { font-weight: 600; color: #0f172a; }
+
+  .naics-row { font-size: 9.8pt; line-height: 1.6; color: #334155; }
+  .naics-code { font-weight: 700; color: #1B4F8A; }
+
+  .cert-item { font-size: 9.8pt; line-height: 1.4; color: #334155; margin-bottom: 8px; display: flex; gap: 7px; }
+  .cert-item .dot { color: #22c55e; font-weight: 700; }
+  .cert-item b { color: #0f172a; }
+
+  .comp-list { list-style: none; }
+  .comp-list li {
+    font-size: 10.8pt; line-height: 1.4; color: #334155;
+    margin-bottom: 8px; padding-left: 20px; position: relative;
+  }
+  .comp-list li::before {
+    content: "✓"; position: absolute; left: 0; color: #22c55e; font-weight: 700;
+  }
+
+  .diff-list li {
+    font-size: 10.8pt; line-height: 1.4; color: #334155;
+    margin-bottom: 9px; padding-left: 20px; position: relative;
+  }
+  .diff-list li::before {
+    content: "—"; position: absolute; left: 0; color: #2E75B6; font-weight: 700;
+  }
+  .diff-list { list-style: none; }
+
+  .project { margin-bottom: 12px; }
+  .project-title { font-size: 11pt; font-weight: 700; color: #0f172a; }
+  .project-desc { font-size: 10.2pt; line-height: 1.4; color: #475569; margin-top: 3px; }
+  .project-tags { margin-top: 6px; }
+  .tag {
+    display: inline-block; font-size: 8.3pt; font-weight: 600; color: #334155;
+    background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 6px;
+    padding: 3px 8px; margin: 2px 4px 0 0;
+  }
+
+  /* Point of contact */
+  .poc {
+    margin-top: 8px;
+    background: linear-gradient(135deg, #1B4F8A, #2E75B6);
+    border-radius: 10px;
+    padding: 13px 20px;
+    display: flex; justify-content: space-between; align-items: center;
+    color: #ffffff;
+  }
+  .poc-title { font-size: 11.5pt; font-weight: 700; }
+  .poc-sub { font-size: 9.5pt; color: #dbeafe; margin-top: 3px; }
+  .poc-contact { text-align: right; font-size: 10pt; line-height: 1.6; }
+  .poc-contact b { display: block; font-size: 11pt; }
+
+  /* Footer */
+  .footer {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: #0f172a; color: #cbd5e1;
+    padding: 14px 0.55in; font-size: 9pt;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer b { color: #ffffff; }
+</style>
+</head>
+<body>
+  <div class="page" data-canvas-width="816" data-canvas-height="1056">
+    <div class="content">
+
+      <div class="header">
+        <div>
+          <div class="brand-row">
+            <div class="mark">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M9 7 L4 12 L9 17" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M15 7 L20 12 L15 17" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <span class="company-name heading">DELIVERYLINK LLC</span>
+          </div>
+          <div class="tagline">IT Modernization &amp; AI-Driven Automation for Federal Agencies</div>
+        </div>
+        <div class="cap-badge">CAPABILITY&nbsp;STATEMENT</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="cols">
+        <!-- LEFT COLUMN -->
+        <div class="col-left">
+
+          <div class="section">
+            <div class="section-title">Company Info</div>
+            <div class="info-row"><span class="info-label">Owner:</span> Luis David Vergara</div>
+            <div class="info-row"><span class="info-label">Location:</span> Loxahatchee, FL 33470</div>
+            <div class="info-row"><span class="info-label">Phone:</span> (561) 679-0314</div>
+            <div class="info-row"><span class="info-label">Email:</span> ldvh@deliverylinktech.com</div>
+            <div class="info-row"><span class="info-label">Website:</span> deliverylinktech.com</div>
+            <div class="info-row"><span class="info-label">UEI:</span> JK4YVQB7DZ24</div>
+            <div class="info-row"><span class="info-label">CAGE:</span> 21GG9</div>
+            <div class="info-row"><span class="info-label">Business Type:</span> Small Business, Hispanic American-Owned</div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">NAICS Codes</div>
+            <div class="naics-row"><span class="naics-code">541511</span> — Custom Computer Programming Services</div>
+            <div class="naics-row"><span class="naics-code">541512</span> — Computer Systems Design Services</div>
+            <div class="naics-row"><span class="naics-code">541513</span> — Computer Facilities Management</div>
+            <div class="naics-row"><span class="naics-code">541519</span> — Other Computer Related Services</div>
+            <div class="naics-row"><span class="naics-code">541619</span> — Other Management Consulting Services</div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Certifications</div>
+            <div class="cert-item"><span class="dot">●</span><span><b>Active SAM.gov Registration</b><br>UEI: JK4YVQB7DZ24</span></div>
+            <div class="cert-item"><span class="dot">●</span><span><b>CAGE Code</b><br>21GG9</span></div>
+            <div class="cert-item"><span class="dot">●</span><span><b>Hispanic American-Owned Small Business</b><br>MFMP Certified</span></div>
+            <div class="cert-item"><span class="dot">●</span><span><b>Google IT Support Professional</b><br>Certificate</span></div>
+          </div>
+
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div class="col-right">
+
+          <div class="section">
+            <div class="section-title">Core Competencies</div>
+            <ul class="comp-list">
+              <li>Custom Software Development (React, Python, Node.js)</li>
+              <li>AI/LLM Integration (Claude API, GPT, NLP)</li>
+              <li>Cloud Architecture (Azure, AWS, Cloudflare)</li>
+              <li>Web Application Modernization (Section 508 Compliant)</li>
+              <li>IT Strategic Consulting &amp; Digital Transformation</li>
+              <li>Federal Procurement &amp; Proposal Support</li>
+            </ul>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Why DeliveryLink</div>
+            <ul class="diff-list">
+              <li>Cuts operational costs for federal agencies through AI-powered automation and legacy system modernization.</li>
+              <li>Section 508-compliant development builds accessibility in from day one, not as an afterthought.</li>
+              <li>Hands-on federal procurement experience — from SAM.gov registration to proposal writing.</li>
+            </ul>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Past Performance</div>
+            <div class="project">
+              <div class="project-title">FinAdvisor Pro</div>
+              <div class="project-desc">Gives financial advisors instant, AI-assisted client guidance while meeting bank-grade security requirements — Claude API analysis, TLS 1.3 encryption, and role-based access control, deployed on Azure.</div>
+              <div class="project-tags">
+                <span class="tag">Claude API</span><span class="tag">React</span><span class="tag">Azure</span><span class="tag">RBAC</span><span class="tag">TLS 1.3</span>
+              </div>
+            </div>
+            <div class="project">
+              <div class="project-title">SAM.gov Intelligence Platform</div>
+              <div class="project-desc">Eliminates hours of manual opportunity searches by automatically monitoring 60+ federal data sources daily, with intelligent filtering and real-time alerts.</div>
+              <div class="project-tags">
+                <span class="tag">Python</span><span class="tag">REST API</span><span class="tag">Automation</span><span class="tag">Federal</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="poc">
+        <div>
+          <div class="poc-title">Ready to discuss a project?</div>
+          <div class="poc-sub">Free consultation for federal and commercial engagements.</div>
+        </div>
+        <div class="poc-contact">
+          <b>Luis David Vergara</b>
+          ldvh@deliverylinktech.com<br>
+          (561) 679-0314
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div><b>DELIVERYLINK LLC</b> &nbsp;|&nbsp; ldvh@deliverylinktech.com &nbsp;|&nbsp; (561) 679-0314</div>
+      <div>UEI: JK4YVQB7DZ24 &nbsp;|&nbsp; CAGE: 21GG9 &nbsp;|&nbsp; deliverylinktech.com</div>
+    </div>
+  </div>
+</body>
+</html>
