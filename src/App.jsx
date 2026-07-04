@@ -111,6 +111,13 @@ const ASSESSMENT_INITIAL = {
   government_experience: '',
 }
 
+const STRATEGY_CALL_INITIAL = {
+  name: '',
+  company: '',
+  email: '',
+  phone: '',
+}
+
 const ASSESSMENT_STEPS = [
   { title: 'Business Profile', fields: ['business_name', 'owner_name'] },
   { title: 'Contact Details', fields: ['email', 'phone', 'state'] },
@@ -120,6 +127,8 @@ const ASSESSMENT_STEPS = [
 ]
 
 const FIELD_LABELS = {
+  name: 'Name',
+  company: 'Company',
   business_name: 'Business Name',
   owner_name: 'Owner Name',
   email: 'Email',
@@ -212,6 +221,48 @@ async function submitGovernmentLead(values, score) {
     const detail = await res.text().catch(() => '')
     throw new Error(detail || `Supabase submission failed with status ${res.status}.`)
   }
+}
+
+async function submitStrategyCall(values) {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    throw new Error('Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.')
+  }
+
+  const payload = {
+    name: values.name.trim(),
+    company: values.company.trim(),
+    email: values.email.trim(),
+    phone: values.phone.trim(),
+  }
+
+  const res = await fetch(`${SUPABASE_URL.replace(/\/$/, '')}/rest/v1/strategy_calls`, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=minimal',
+    },
+    body: JSON.stringify(payload),
+  })
+
+  if (!res.ok) {
+    const detail = await res.text().catch(() => '')
+    throw new Error(detail || `Supabase submission failed with status ${res.status}.`)
+  }
+}
+
+async function fetchAdminLeads(token) {
+  const res = await fetch('/api/admin-leads', {
+    headers: { 'x-admin-token': token },
+  })
+
+  if (!res.ok) {
+    const detail = await res.json().catch(() => ({}))
+    throw new Error(detail.error?.message || `Admin request failed with status ${res.status}.`)
+  }
+
+  return res.json()
 }
 
 const SYSTEM_PROMPT = `You are the virtual assistant for DELIVERYLINK LLC, a Florida-based AI platform for government contracting readiness and opportunity intelligence. Respond in English by default. Switch to Spanish immediately if the user writes in Spanish or requests it.
@@ -321,6 +372,73 @@ function YesNoField({ id, value, onChange }) {
   )
 }
 
+function StrategyReviewForm() {
+  const [values, setValues] = useState(STRATEGY_CALL_INITIAL)
+  const [status, setStatus] = useState('idle')
+  const [error, setError] = useState('')
+
+  const updateValue = (field, value) => {
+    setValues(prev => ({ ...prev, [field]: value }))
+    setError('')
+  }
+
+  const submitReview = async (event) => {
+    event.preventDefault()
+    const complete = Object.values(values).every(value => value.trim())
+    if (!complete) {
+      setError('Complete every field to request your review.')
+      return
+    }
+
+    setStatus('submitting')
+    setError('')
+
+    try {
+      await submitStrategyCall(values)
+      setStatus('submitted')
+    } catch (err) {
+      setStatus('idle')
+      setError(err.message)
+    }
+  }
+
+  if (status === 'submitted') {
+    return (
+      <div className="mt-6 rounded-2xl border border-green-100 bg-green-50 p-5 text-green-800">
+        <div className="font-bold mb-1">Thank you.</div>
+        <p className="text-sm leading-relaxed">
+          A Government Contract Advisor from DeliveryLink will contact you within one business day.
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <form onSubmit={submitReview} className="mt-6 rounded-2xl border border-slate-100 bg-white p-5">
+      <h4 className="font-bold text-slate-900 mb-1">Request Your Free Government Readiness Review</h4>
+      <p className="text-sm text-slate-500 mb-5">Share your contact details and we will follow up with next steps.</p>
+
+      <div className="grid sm:grid-cols-2 gap-4">
+        <TextInput id="name" value={values.name} onChange={updateValue} />
+        <TextInput id="company" value={values.company} onChange={updateValue} />
+        <TextInput id="email" type="email" value={values.email} onChange={updateValue} />
+        <TextInput id="phone" type="tel" value={values.phone} onChange={updateValue} />
+      </div>
+
+      {error && (
+        <div className="mt-4 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+          {error}
+        </div>
+      )}
+
+      <button type="submit" disabled={status === 'submitting'}
+        className="mt-5 inline-flex w-full items-center justify-center gap-2 bg-brand-dark hover:bg-brand text-white font-semibold px-6 py-3 rounded-xl transition text-base shadow-lg shadow-brand-dark/20 disabled:opacity-60">
+        {status === 'submitting' ? 'Sending...' : 'Request Your Free Government Readiness Review'} <ArrowRight size={18} />
+      </button>
+    </form>
+  )
+}
+
 function ReadinessAssessment() {
   const [step, setStep] = useState(0)
   const [values, setValues] = useState(ASSESSMENT_INITIAL)
@@ -397,10 +515,7 @@ function ReadinessAssessment() {
                 </li>
               ))}
             </ol>
-            <a href={`mailto:${COMPANY.email}?subject=Free%20Government%20Strategy%20Call&body=Hi%20Luis%2C%20I%20completed%20the%20readiness%20assessment%20and%20my%20score%20was%20${result.score}%2F100.%20I%20would%20like%20to%20book%20a%20free%20strategy%20call.`}
-              className="mt-6 inline-flex w-full items-center justify-center gap-2 bg-brand-dark hover:bg-brand text-white font-semibold px-6 py-3 rounded-xl transition text-base shadow-lg shadow-brand-dark/20">
-              Book a Free Strategy Call <ArrowRight size={18} />
-            </a>
+            <StrategyReviewForm />
           </div>
         </div>
       </div>
@@ -465,6 +580,125 @@ function ReadinessAssessment() {
         )}
       </div>
     </form>
+  )
+}
+
+function AdminField({ label, value }) {
+  return (
+    <div>
+      <div className="text-xs font-semibold uppercase text-slate-400">{label}</div>
+      <div className="text-sm text-slate-700 break-words">{value || '-'}</div>
+    </div>
+  )
+}
+
+function AdminPage() {
+  const [token, setToken] = useState('')
+  const [data, setData] = useState({ government_leads: [], strategy_calls: [] })
+  const [status, setStatus] = useState('idle')
+  const [error, setError] = useState('')
+
+  const loadAdminData = async (event) => {
+    event.preventDefault()
+    if (!token.trim()) {
+      setError('Enter the admin token.')
+      return
+    }
+
+    setStatus('loading')
+    setError('')
+
+    try {
+      const result = await fetchAdminLeads(token.trim())
+      setData(result)
+      setStatus('loaded')
+    } catch (err) {
+      setStatus('idle')
+      setError(err.message)
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-800">
+      <header className="bg-white border-b border-slate-100">
+        <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
+          <a href="/" className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-brand-dark to-brand flex items-center justify-center">
+              <Code size={20} className="text-white" aria-hidden="true" />
+            </div>
+            <span className="font-bold text-lg text-slate-800">DELIVERYLINK Admin</span>
+          </a>
+          <a href="/" className="text-sm font-semibold text-brand-dark hover:text-brand transition">Back to site</a>
+        </div>
+      </header>
+
+      <main className="max-w-6xl mx-auto px-5 py-10">
+        <SectionTitle badge="Admin" title="Lead Dashboard"
+          subtitle="Government Readiness leads and Strategy Call requests, newest first." />
+
+        {status !== 'loaded' && (
+          <form onSubmit={loadAdminData} className="max-w-md mx-auto bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
+            <label htmlFor="admin-token" className="block text-sm font-semibold text-slate-700 mb-2">Admin token</label>
+            <input id="admin-token" type="password" value={token} onChange={e => setToken(e.target.value)}
+              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-800 outline-none transition focus:border-brand focus:ring-4 focus:ring-blue-50"
+            />
+            {error && <div className="mt-4 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{error}</div>}
+            <button type="submit" disabled={status === 'loading'}
+              className="mt-5 inline-flex w-full items-center justify-center gap-2 bg-brand-dark hover:bg-brand text-white font-semibold px-6 py-3 rounded-xl transition text-base shadow-lg shadow-brand-dark/20 disabled:opacity-60">
+              {status === 'loading' ? 'Loading...' : 'View Leads'}
+            </button>
+          </form>
+        )}
+
+        {status === 'loaded' && (
+          <div className="grid lg:grid-cols-2 gap-8">
+            <section>
+              <h2 className="text-2xl font-bold text-slate-900 mb-4">Government Readiness leads</h2>
+              <div className="space-y-4">
+                {data.government_leads.length === 0 && <p className="text-slate-500 bg-white rounded-2xl border border-slate-100 p-6">No readiness leads yet.</p>}
+                {data.government_leads.map(lead => (
+                  <article key={lead.id} className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
+                    <div className="flex items-start justify-between gap-4 mb-4">
+                      <div>
+                        <h3 className="font-bold text-slate-900">{lead.business_name}</h3>
+                        <p className="text-sm text-slate-500">{new Date(lead.created_at).toLocaleString()}</p>
+                      </div>
+                      <div className="rounded-xl bg-blue-50 px-3 py-2 text-brand-dark font-bold">{lead.score}/100</div>
+                    </div>
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <AdminField label="Owner" value={lead.owner_name} />
+                      <AdminField label="Email" value={lead.email} />
+                      <AdminField label="Phone" value={lead.phone} />
+                      <AdminField label="State" value={lead.state} />
+                      <AdminField label="Industry" value={lead.industry} />
+                      <AdminField label="SAM" value={lead.sam ? 'Yes' : 'No'} />
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </section>
+
+            <section>
+              <h2 className="text-2xl font-bold text-slate-900 mb-4">Strategy Call requests</h2>
+              <div className="space-y-4">
+                {data.strategy_calls.length === 0 && <p className="text-slate-500 bg-white rounded-2xl border border-slate-100 p-6">No strategy call requests yet.</p>}
+                {data.strategy_calls.map(request => (
+                  <article key={request.id} className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
+                    <h3 className="font-bold text-slate-900 mb-1">{request.name}</h3>
+                    <p className="text-sm text-slate-500 mb-4">{new Date(request.created_at).toLocaleString()}</p>
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <AdminField label="Company" value={request.company} />
+                      <AdminField label="Email" value={request.email} />
+                      <AdminField label="Phone" value={request.phone} />
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </section>
+          </div>
+        )}
+      </main>
+    </div>
   )
 }
 
@@ -788,6 +1022,7 @@ function CapabilityStatement() {
 export default function App() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const isAdmin = window.location.pathname === '/admin'
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
@@ -796,6 +1031,10 @@ export default function App() {
   }, [])
 
   const closeMenu = () => setMenuOpen(false)
+
+  if (isAdmin) {
+    return <AdminPage />
+  }
 
   return (
     <div className="min-h-screen bg-white text-slate-800">
