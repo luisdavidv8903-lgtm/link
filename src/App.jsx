@@ -6,6 +6,15 @@ import {
 } from 'lucide-react'
 import BlogLayout from './BlogLayout'
 import { SEO_PAGES } from './seoContent'
+import {
+  initAnalytics,
+  setupScrollDepthTracking,
+  trackCallClick,
+  trackCtaClick,
+  trackFormCompleted,
+  trackFormStarted,
+  trackWhatsAppClick,
+} from './analytics'
 
 // ─── Company Data / Datos de la empresa ───
 const COMPANY = {
@@ -382,8 +391,13 @@ function StrategyReviewForm() {
   const [values, setValues] = useState(STRATEGY_CALL_INITIAL)
   const [status, setStatus] = useState('idle')
   const [error, setError] = useState('')
+  const [started, setStarted] = useState(false)
 
   const updateValue = (field, value) => {
+    if (!started) {
+      setStarted(true)
+      trackFormStarted('government_readiness_review')
+    }
     setValues(prev => ({ ...prev, [field]: value }))
     setError('')
   }
@@ -401,6 +415,7 @@ function StrategyReviewForm() {
 
     try {
       await submitStrategyCall(values)
+      trackFormCompleted('government_readiness_review')
       setStatus('submitted')
     } catch (err) {
       setStatus('idle')
@@ -451,10 +466,15 @@ function ReadinessAssessment() {
   const [status, setStatus] = useState('idle')
   const [error, setError] = useState('')
   const [result, setResult] = useState(null)
+  const [started, setStarted] = useState(false)
   const activeStep = ASSESSMENT_STEPS[step]
   const progress = Math.round(((step + 1) / ASSESSMENT_STEPS.length) * 100)
 
   const updateValue = (field, value) => {
+    if (!started) {
+      setStarted(true)
+      trackFormStarted('government_readiness_assessment')
+    }
     setValues(prev => ({ ...prev, [field]: value }))
     setError('')
   }
@@ -481,6 +501,7 @@ function ReadinessAssessment() {
 
     try {
       await submitGovernmentLead(values, score)
+      trackFormCompleted('government_readiness_assessment')
       setResult({ score, recommendations: getRecommendations(values) })
       setStatus('submitted')
     } catch (err) {
@@ -715,10 +736,12 @@ function FloatingConversionButtons() {
     <div className="no-print">
       <div className="fixed left-4 bottom-24 md:bottom-5 z-[9997] flex flex-col gap-3">
         <a href={WHATSAPP_URL} aria-label="Message DeliveryLink on WhatsApp"
+          onClick={() => trackWhatsAppClick('floating_button')}
           className="w-14 h-14 rounded-full bg-green-500 hover:bg-green-600 shadow-lg flex items-center justify-center transition">
           <MessageCircle size={24} className="text-white" />
         </a>
         <a href={phoneHref} aria-label="Call DeliveryLink"
+          onClick={() => trackCallClick('floating_button')}
           className="w-14 h-14 rounded-full bg-brand-dark hover:bg-brand shadow-lg flex items-center justify-center transition">
           <Phone size={24} className="text-white" />
         </a>
@@ -726,6 +749,7 @@ function FloatingConversionButtons() {
 
       <div className="fixed inset-x-0 bottom-0 z-[9996] md:hidden bg-white border-t border-slate-200 p-3 shadow-2xl">
         <a href="#assessment-form"
+          onClick={() => trackCtaClick(PRIMARY_CTA, 'mobile_sticky')}
           className="inline-flex w-full items-center justify-center gap-2 bg-brand-dark hover:bg-brand text-white font-semibold px-5 py-3.5 rounded-xl transition shadow-lg shadow-brand-dark/20">
           {PRIMARY_CTA} <ArrowRight size={18} />
         </a>
@@ -1063,6 +1087,11 @@ export default function App() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
+  useEffect(() => {
+    initAnalytics()
+    return setupScrollDepthTracking()
+  }, [])
+
   const closeMenu = () => setMenuOpen(false)
 
   if (isAdmin) {
@@ -1099,6 +1128,7 @@ export default function App() {
             <NavLink href="#capability">Capability</NavLink>
             <NavLink href="#contact">Contact</NavLink>
             <a href="#assessment-form"
+              onClick={() => trackCtaClick(PRIMARY_CTA, 'desktop_nav')}
               className="bg-brand-dark hover:bg-brand text-white font-semibold px-5 py-2 rounded-xl transition text-sm">
               {PRIMARY_CTA}
             </a>
@@ -1119,7 +1149,7 @@ export default function App() {
               <NavLink href="#projects" onClick={closeMenu}>Projects</NavLink>
               <NavLink href="#capability" onClick={closeMenu}>Capability</NavLink>
               <NavLink href="#contact" onClick={closeMenu}>Contact</NavLink>
-              <a href="#assessment-form" onClick={closeMenu}
+              <a href="#assessment-form" onClick={() => { closeMenu(); trackCtaClick(PRIMARY_CTA, 'mobile_nav') }}
                 className="bg-brand-dark text-white font-semibold px-5 py-2.5 rounded-xl text-center transition">
                 {PRIMARY_CTA}
               </a>
@@ -1145,10 +1175,12 @@ export default function App() {
               </p>
               <div className="flex flex-wrap gap-4 animate-fadeInUp delay-300">
                 <a href="#assessment-form"
+                  onClick={() => trackCtaClick(PRIMARY_CTA, 'hero_primary')}
                   className="inline-flex items-center gap-2 bg-brand-dark hover:bg-brand text-white font-semibold px-7 py-4 rounded-xl transition text-base shadow-lg shadow-brand-dark/20">
                   {PRIMARY_CTA} <ArrowRight size={18} />
                 </a>
                 <a href={WHATSAPP_URL}
+                  onClick={() => trackWhatsAppClick('hero_secondary')}
                   className="inline-flex items-center gap-2 border-2 border-slate-200 hover:border-brand text-slate-700 font-semibold px-7 py-4 rounded-xl transition text-base">
                   Get Free Review on WhatsApp <MessageCircle size={18} />
                 </a>
@@ -1186,6 +1218,7 @@ export default function App() {
                 </div>
               </div>
               <a href="#assessment-form"
+                onClick={() => trackCtaClick(PRIMARY_CTA, 'hero_offer_card')}
                 className="inline-flex w-full items-center justify-center gap-2 bg-brand-dark hover:bg-brand text-white font-semibold px-6 py-4 rounded-xl transition text-base shadow-lg shadow-brand-dark/20">
                 {PRIMARY_CTA} <ArrowRight size={18} />
               </a>
@@ -1206,6 +1239,7 @@ export default function App() {
 
           <div className="text-center mt-10">
             <a href="#assessment-form"
+              onClick={() => trackCtaClick(PRIMARY_CTA, 'readiness_section')}
               className="inline-flex items-center gap-2 bg-brand-dark hover:bg-brand text-white font-semibold px-6 py-3 rounded-xl transition text-base shadow-lg shadow-brand-dark/20">
               {PRIMARY_CTA} <ArrowRight size={18} />
             </a>
@@ -1235,10 +1269,12 @@ export default function App() {
 
               <div className="flex flex-wrap md:flex-col gap-4">
                 <a href="#assessment-form"
+                  onClick={() => trackCtaClick(PRIMARY_CTA, 'featured_product_primary')}
                   className="inline-flex items-center justify-center gap-2 bg-brand-dark hover:bg-brand text-white font-semibold px-6 py-3 rounded-xl transition text-base shadow-lg shadow-brand-dark/20">
                   {PRIMARY_CTA} <ArrowRight size={18} />
                 </a>
                 <a href="#assessment-form"
+                  onClick={() => trackCtaClick(PRIMARY_CTA, 'featured_product_secondary')}
                   className="inline-flex items-center justify-center gap-2 border-2 border-slate-200 hover:border-brand text-slate-700 font-semibold px-6 py-3 rounded-xl transition text-base">
                   {PRIMARY_CTA} <ChevronRight size={18} />
                 </a>
@@ -1320,10 +1356,12 @@ export default function App() {
 
           <div className="flex flex-wrap justify-center gap-4 mb-12">
             <a href="#assessment-form"
+              onClick={() => trackCtaClick(PRIMARY_CTA, 'final_cta_primary')}
               className="inline-flex items-center gap-2 bg-brand-dark hover:bg-brand text-white font-semibold px-6 py-3 rounded-xl transition text-base shadow-lg shadow-brand-dark/20">
               {PRIMARY_CTA} <ArrowRight size={18} />
             </a>
             <a href={WHATSAPP_URL}
+              onClick={() => trackWhatsAppClick('final_cta_secondary')}
               className="inline-flex items-center gap-2 border-2 border-slate-200 hover:border-brand text-slate-700 font-semibold px-6 py-3 rounded-xl transition text-base">
               Get Free Review on WhatsApp <MessageCircle size={18} />
             </a>
@@ -1342,6 +1380,7 @@ export default function App() {
             </a>
 
             <a href={`tel:${COMPANY.phone.replace(/[^\d+]/g, '')}`}
+              onClick={() => trackCallClick('contact_card')}
               className="flex flex-col items-center gap-3 bg-white rounded-2xl border border-slate-100 p-6 hover:shadow-lg hover:border-brand/20 transition-all text-center group">
               <div className="w-14 h-14 rounded-2xl bg-blue-50 group-hover:bg-brand-dark flex items-center justify-center transition-colors">
                 <Phone size={24} className="text-brand-dark group-hover:text-white transition-colors" />

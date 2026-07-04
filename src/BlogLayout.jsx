@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { ArrowRight, CheckCircle, MessageCircle } from 'lucide-react'
 import { SEO_PAGES, SITE_URL, ctaText } from './seoContent'
+import { trackCtaClick, trackWhatsAppClick } from './analytics'
 
 function setMeta(name, content, property = false) {
   const attr = property ? 'property' : 'name'
@@ -70,6 +71,7 @@ function ArticleCta() {
           </p>
         </div>
         <a href="/#assessment-form"
+          onClick={() => trackCtaClick(ctaText, 'article_cta')}
           className="inline-flex items-center justify-center gap-2 bg-brand-dark hover:bg-brand text-white font-semibold px-6 py-4 rounded-xl transition shadow-lg shadow-brand-dark/20">
           {ctaText} <ArrowRight size={18} />
         </a>
@@ -108,6 +110,7 @@ export default function BlogLayout({ page }) {
         <div className="max-w-5xl mx-auto px-5 h-16 flex items-center justify-between">
           <a href="/" className="font-bold text-slate-900">DELIVERYLINK</a>
           <a href="/#assessment-form"
+            onClick={() => trackCtaClick(ctaText, 'blog_nav')}
             className="bg-brand-dark hover:bg-brand text-white font-semibold px-4 py-2 rounded-xl transition text-sm">
             {ctaText}
           </a>
@@ -204,10 +207,12 @@ export default function BlogLayout({ page }) {
 
           <div className="mt-10 flex flex-wrap gap-4">
             <a href="/#assessment-form"
+              onClick={() => trackCtaClick(ctaText, 'article_footer')}
               className="inline-flex items-center gap-2 bg-brand-dark hover:bg-brand text-white font-semibold px-6 py-4 rounded-xl transition shadow-lg shadow-brand-dark/20">
               {ctaText} <ArrowRight size={18} />
             </a>
             <a href="https://wa.me/15616790314?text=I%20want%20my%20free%20Government%20Contract%20Readiness%20Review."
+              onClick={() => trackWhatsAppClick('article_footer')}
               className="inline-flex items-center gap-2 border-2 border-slate-200 hover:border-brand text-slate-700 font-semibold px-6 py-4 rounded-xl transition">
               Ask on WhatsApp <MessageCircle size={18} />
             </a>
