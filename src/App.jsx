@@ -4,6 +4,8 @@ import {
   FileText, Users, Award, Building2, Briefcase, ArrowRight, ExternalLink,
   MessageCircle, Send, Printer, Download, Star, CheckCircle, Clock, DollarSign
 } from 'lucide-react'
+import BlogLayout from './BlogLayout'
+import { SEO_PAGES } from './seoContent'
 
 // ─── Company Data / Datos de la empresa ───
 const COMPANY = {
@@ -1053,6 +1055,7 @@ export default function App() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const isAdmin = window.location.pathname === '/admin'
+  const seoPage = SEO_PAGES.find(page => page.slug === window.location.pathname)
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
@@ -1064,6 +1067,10 @@ export default function App() {
 
   if (isAdmin) {
     return <AdminPage />
+  }
+
+  if (seoPage) {
+    return <BlogLayout page={seoPage} />
   }
 
   return (
