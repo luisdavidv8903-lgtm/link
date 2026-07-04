@@ -79,11 +79,16 @@ function ArticleCta() {
 }
 
 function InternalLinks({ currentSlug }) {
+  const currentPage = SEO_PAGES.find(page => page.slug === currentSlug)
+  const coreLinks = SEO_PAGES.filter(page => page.type !== 'industry' && page.slug !== currentSlug).slice(0, 6)
+  const industryLinks = SEO_PAGES.filter(page => page.type === 'industry' && page.slug !== currentSlug).slice(0, currentPage?.type === 'industry' ? 6 : 10)
+  const links = [...coreLinks, ...industryLinks]
+
   return (
     <section className="mt-12 rounded-2xl border border-slate-100 bg-white p-6">
       <h2 className="text-2xl font-bold text-slate-900 mb-4">Related government contracting guides</h2>
       <div className="grid md:grid-cols-2 gap-3">
-        {SEO_PAGES.filter(page => page.slug !== currentSlug).map(page => (
+        {links.map(page => (
           <a key={page.slug} href={page.slug}
             className="rounded-xl border border-slate-100 bg-slate-50 p-4 hover:border-brand/30 hover:bg-blue-50/40 transition">
             <h3 className="font-bold text-slate-900 mb-1">{page.title}</h3>
