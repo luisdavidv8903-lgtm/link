@@ -18,6 +18,10 @@ const COMPANY = {
   naics: ['541511', '541512', '541513', '541519', '541619'],
 }
 
+const PRIMARY_OFFER = 'FREE Government Contract Readiness Review'
+const PRIMARY_CTA = 'Get My Free Review'
+const WHATSAPP_URL = 'https://wa.me/15616790314?text=I%20want%20my%20free%20Government%20Contract%20Readiness%20Review.'
+
 const SERVICES = [
   {
     icon: Code, title: 'Custom Software Development', rate: '$95–$145/hr',
@@ -179,7 +183,7 @@ function getRecommendations(values) {
     'Build an opportunity watchlist for agencies buying in your industry.',
     'Prepare a short outreach plan for contracting officers and prime contractors.',
     'Review certifications that may improve your competitive position.',
-    'Book a strategy call to prioritize your fastest path to market.',
+    'Request your free Government Contract Readiness Review to prioritize your fastest path to market.',
   ]
 
   return [...recommendations, ...nextSteps].slice(0, 5)
@@ -702,6 +706,32 @@ function AdminPage() {
   )
 }
 
+function FloatingConversionButtons() {
+  const phoneHref = `tel:${COMPANY.phone.replace(/[^\d+]/g, '')}`
+
+  return (
+    <div className="no-print">
+      <div className="fixed left-4 bottom-24 md:bottom-5 z-[9997] flex flex-col gap-3">
+        <a href={WHATSAPP_URL} aria-label="Message DeliveryLink on WhatsApp"
+          className="w-14 h-14 rounded-full bg-green-500 hover:bg-green-600 shadow-lg flex items-center justify-center transition">
+          <MessageCircle size={24} className="text-white" />
+        </a>
+        <a href={phoneHref} aria-label="Call DeliveryLink"
+          className="w-14 h-14 rounded-full bg-brand-dark hover:bg-brand shadow-lg flex items-center justify-center transition">
+          <Phone size={24} className="text-white" />
+        </a>
+      </div>
+
+      <div className="fixed inset-x-0 bottom-0 z-[9996] md:hidden bg-white border-t border-slate-200 p-3 shadow-2xl">
+        <a href="#assessment-form"
+          className="inline-flex w-full items-center justify-center gap-2 bg-brand-dark hover:bg-brand text-white font-semibold px-5 py-3.5 rounded-xl transition shadow-lg shadow-brand-dark/20">
+          {PRIMARY_CTA} <ArrowRight size={18} />
+        </a>
+      </div>
+    </div>
+  )
+}
+
 // ─── Chat Widget Component / Componente del Chat ───
 function ChatWidget() {
   const [open, setOpen] = useState(false)
@@ -911,7 +941,7 @@ function ChatWidget() {
 
       {/* FAB */}
       <button onClick={() => setOpen(p => !p)} aria-label={open ? 'Close chat' : 'Open chat'} aria-expanded={open}
-        className="fixed bottom-5 right-4 sm:right-5 w-[60px] h-[60px] rounded-full border-none cursor-pointer z-[9999] bg-gradient-to-br from-brand-dark to-brand shadow-lg flex items-center justify-center transition-transform"
+        className="fixed bottom-24 md:bottom-5 right-4 sm:right-5 w-[60px] h-[60px] rounded-full border-none cursor-pointer z-[9999] bg-gradient-to-br from-brand-dark to-brand shadow-lg flex items-center justify-center transition-transform"
         style={{
           transform: open ? 'rotate(90deg)' : 'rotate(0deg)',
           animation: pulse ? 'dlPulse 2s infinite' : 'none',
@@ -1037,7 +1067,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-slate-800">
+    <div className="min-h-screen bg-white text-slate-800 pb-20 md:pb-0">
       <a href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[9999] focus:bg-white focus:text-brand-dark focus:font-semibold focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-lg">
         Skip to main content
@@ -1061,9 +1091,9 @@ export default function App() {
             <NavLink href="#projects">Projects</NavLink>
             <NavLink href="#capability">Capability</NavLink>
             <NavLink href="#contact">Contact</NavLink>
-            <a href="#contact"
+            <a href="#assessment-form"
               className="bg-brand-dark hover:bg-brand text-white font-semibold px-5 py-2 rounded-xl transition text-sm">
-              Get Started
+              {PRIMARY_CTA}
             </a>
           </div>
 
@@ -1082,9 +1112,9 @@ export default function App() {
               <NavLink href="#projects" onClick={closeMenu}>Projects</NavLink>
               <NavLink href="#capability" onClick={closeMenu}>Capability</NavLink>
               <NavLink href="#contact" onClick={closeMenu}>Contact</NavLink>
-              <a href="#contact" onClick={closeMenu}
+              <a href="#assessment-form" onClick={closeMenu}
                 className="bg-brand-dark text-white font-semibold px-5 py-2.5 rounded-xl text-center transition">
-                Get Started
+                {PRIMARY_CTA}
               </a>
             </div>
           </div>
@@ -1093,37 +1123,65 @@ export default function App() {
 
       <main id="main-content" tabIndex={-1}>
       {/* ── Hero ── */}
-      <section id="hero" className="pt-28 pb-20 md:pt-36 md:pb-28 bg-gradient-to-b from-blue-50/60 to-white">
+      <section id="hero" className="pt-24 pb-16 md:pt-32 md:pb-24 bg-gradient-to-b from-blue-50/60 to-white">
         <div className="max-w-6xl mx-auto px-5">
-          <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 bg-blue-50 text-brand-dark text-sm font-semibold px-4 py-1.5 rounded-full mb-6 animate-fadeInUp">
-              <Shield size={14} /> AI Platform for Government Contracting
-            </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-900 leading-tight mb-5 animate-fadeInUp delay-100">
-              Win More Government<br />
-              <span className="bg-gradient-to-r from-brand-dark to-brand bg-clip-text text-transparent">
-                Contracts with AI
-              </span>
-            </h1>
-            <p className="text-lg md:text-xl text-slate-500 mb-8 max-w-xl animate-fadeInUp delay-200">
-              Discover in minutes if your business is ready to compete for U.S. federal contracts. Get an AI-powered readiness assessment and opportunity intelligence.
-            </p>
-            <div className="flex flex-wrap gap-4 animate-fadeInUp delay-300">
-              <a href="#assessment-form"
-                className="inline-flex items-center gap-2 bg-brand-dark hover:bg-brand text-white font-semibold px-6 py-3 rounded-xl transition text-base shadow-lg shadow-brand-dark/20">
-                Start Free Government Readiness Assessment <ArrowRight size={18} />
-              </a>
-              <a href="#featured-product"
-                className="inline-flex items-center gap-2 border-2 border-slate-200 hover:border-brand text-slate-700 font-semibold px-6 py-3 rounded-xl transition text-base">
-                Explore the Platform <ChevronRight size={18} />
-              </a>
+          <div className="grid lg:grid-cols-[1.05fr_0.95fr] gap-10 items-center">
+            <div>
+              <div className="inline-flex items-center gap-2 bg-blue-50 text-brand-dark text-sm font-semibold px-4 py-1.5 rounded-full mb-6 animate-fadeInUp">
+                <Shield size={14} /> Limited-time first customer offer
+              </div>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-900 leading-tight mb-5 animate-fadeInUp delay-100">
+                {PRIMARY_OFFER}
+              </h1>
+              <p className="text-lg md:text-xl text-slate-500 mb-8 max-w-xl animate-fadeInUp delay-200">
+                Find out in 15 minutes if your business is actually ready to compete for federal contracts.
+              </p>
+              <div className="flex flex-wrap gap-4 animate-fadeInUp delay-300">
+                <a href="#assessment-form"
+                  className="inline-flex items-center gap-2 bg-brand-dark hover:bg-brand text-white font-semibold px-7 py-4 rounded-xl transition text-base shadow-lg shadow-brand-dark/20">
+                  {PRIMARY_CTA} <ArrowRight size={18} />
+                </a>
+                <a href={WHATSAPP_URL}
+                  className="inline-flex items-center gap-2 border-2 border-slate-200 hover:border-brand text-slate-700 font-semibold px-7 py-4 rounded-xl transition text-base">
+                  Get Free Review on WhatsApp <MessageCircle size={18} />
+                </a>
+              </div>
+
+              <div className="flex flex-wrap gap-6 mt-10 text-sm text-slate-500 animate-fadeInUp delay-400">
+                <span className="flex items-center gap-1.5"><CheckCircle size={16} className="text-green-500" /> 15-minute review</span>
+                <span className="flex items-center gap-1.5"><CheckCircle size={16} className="text-green-500" /> No obligation</span>
+                <span className="flex items-center gap-1.5"><CheckCircle size={16} className="text-green-500" /> Built for small businesses</span>
+              </div>
             </div>
 
-            <div className="flex flex-wrap gap-6 mt-12 text-sm text-slate-500 animate-fadeInUp delay-400">
-              <span className="flex items-center gap-1.5"><CheckCircle size={16} className="text-green-500" /> SAM.gov Registered</span>
-              <span className="flex items-center gap-1.5"><CheckCircle size={16} className="text-green-500" /> CAGE: {COMPANY.cage}</span>
-              <span className="flex items-center gap-1.5"><CheckCircle size={16} className="text-green-500" /> UEI: {COMPANY.uei}</span>
-              <span className="flex items-center gap-1.5"><CheckCircle size={16} className="text-green-500" /> Section 508 Compliant</span>
+            <div className="bg-white rounded-2xl border border-slate-100 p-6 md:p-8 shadow-xl shadow-brand-dark/10 animate-fadeInUp delay-200">
+              <div className="flex items-center gap-2 text-brand-dark font-bold text-sm mb-4">
+                <Clock size={18} /> Today only
+              </div>
+              <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 mb-5">{PRIMARY_OFFER}</h2>
+              <p className="font-semibold text-slate-700 mb-4">You will receive:</p>
+              <ul className="space-y-3 text-slate-600 mb-6">
+                {['Readiness Score', 'Missing registrations', 'Capability Statement review', 'Next 5 actions', 'Live Q&A'].map(item => (
+                  <li key={item} className="flex items-center gap-3">
+                    <CheckCircle size={18} className="text-green-500 flex-shrink-0" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="grid grid-cols-2 gap-3 mb-6">
+                <div className="rounded-xl border border-slate-200 p-4">
+                  <div className="text-xs font-semibold text-slate-400 uppercase">Value</div>
+                  <div className="text-2xl font-extrabold text-slate-400 line-through">$297</div>
+                </div>
+                <div className="rounded-xl border border-green-100 bg-green-50 p-4">
+                  <div className="text-xs font-semibold text-green-700 uppercase">Today</div>
+                  <div className="text-2xl font-extrabold text-green-700">FREE</div>
+                </div>
+              </div>
+              <a href="#assessment-form"
+                className="inline-flex w-full items-center justify-center gap-2 bg-brand-dark hover:bg-brand text-white font-semibold px-6 py-4 rounded-xl transition text-base shadow-lg shadow-brand-dark/20">
+                {PRIMARY_CTA} <ArrowRight size={18} />
+              </a>
             </div>
           </div>
         </div>
@@ -1142,7 +1200,7 @@ export default function App() {
           <div className="text-center mt-10">
             <a href="#assessment-form"
               className="inline-flex items-center gap-2 bg-brand-dark hover:bg-brand text-white font-semibold px-6 py-3 rounded-xl transition text-base shadow-lg shadow-brand-dark/20">
-              Analyze My Business <ArrowRight size={18} />
+              {PRIMARY_CTA} <ArrowRight size={18} />
             </a>
           </div>
 
@@ -1171,11 +1229,11 @@ export default function App() {
               <div className="flex flex-wrap md:flex-col gap-4">
                 <a href="#assessment-form"
                   className="inline-flex items-center justify-center gap-2 bg-brand-dark hover:bg-brand text-white font-semibold px-6 py-3 rounded-xl transition text-base shadow-lg shadow-brand-dark/20">
-                  Learn More <ArrowRight size={18} />
+                  {PRIMARY_CTA} <ArrowRight size={18} />
                 </a>
-                <a href="#contact"
+                <a href="#assessment-form"
                   className="inline-flex items-center justify-center gap-2 border-2 border-slate-200 hover:border-brand text-slate-700 font-semibold px-6 py-3 rounded-xl transition text-base">
-                  Request Early Access <ChevronRight size={18} />
+                  {PRIMARY_CTA} <ChevronRight size={18} />
                 </a>
               </div>
             </div>
@@ -1250,17 +1308,17 @@ export default function App() {
       {/* ── Final CTA / Contact ── */}
       <section id="contact" className="py-20 bg-gradient-to-b from-slate-50 to-white">
         <div className="max-w-6xl mx-auto px-5">
-          <SectionTitle badge="Get Started" title="Ready to Sell to the U.S. Government?"
-            subtitle="Get your free AI readiness assessment today." />
+          <SectionTitle badge="Free Review" title={PRIMARY_OFFER}
+            subtitle="Find out in 15 minutes if your business is actually ready to compete for federal contracts." />
 
           <div className="flex flex-wrap justify-center gap-4 mb-12">
             <a href="#assessment-form"
               className="inline-flex items-center gap-2 bg-brand-dark hover:bg-brand text-white font-semibold px-6 py-3 rounded-xl transition text-base shadow-lg shadow-brand-dark/20">
-              Start Assessment <ArrowRight size={18} />
+              {PRIMARY_CTA} <ArrowRight size={18} />
             </a>
-            <a href={`mailto:${COMPANY.email}`}
+            <a href={WHATSAPP_URL}
               className="inline-flex items-center gap-2 border-2 border-slate-200 hover:border-brand text-slate-700 font-semibold px-6 py-3 rounded-xl transition text-base">
-              Contact Us <ChevronRight size={18} />
+              Get Free Review on WhatsApp <MessageCircle size={18} />
             </a>
           </div>
 
@@ -1335,6 +1393,7 @@ export default function App() {
       </footer>
 
       {/* ── Chat Widget ── */}
+      <FloatingConversionButtons />
       <ChatWidget />
     </div>
   )
