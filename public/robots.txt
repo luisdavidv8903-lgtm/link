@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /admin
 
-Sitemap: https://deliverylinktech.com/sitemap.xml
+Sitemap: https://tourmaline-capybara-5424aa.netlify.app/sitemap.xml

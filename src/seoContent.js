@@ -1,4 +1,4 @@
-export const SITE_URL = 'https://deliverylinktech.com'
+export const SITE_URL = 'https://tourmaline-capybara-5424aa.netlify.app'
 
 const ctaText = 'Get My Free Review'
 
