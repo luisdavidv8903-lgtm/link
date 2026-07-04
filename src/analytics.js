@@ -1,6 +1,7 @@
 export const analyticsConfig = {
   enabled: import.meta.env.VITE_ANALYTICS_ENABLED !== 'false',
   ga4MeasurementId: import.meta.env.VITE_GA4_MEASUREMENT_ID || '',
+  ga4CookieDomain: import.meta.env.VITE_GA4_COOKIE_DOMAIN || 'deliverylinktech.com',
   clarityProjectId: import.meta.env.VITE_CLARITY_PROJECT_ID || '',
 }
 
@@ -29,6 +30,7 @@ function initGA4() {
   window.gtag('js', new Date())
   window.gtag('config', analyticsConfig.ga4MeasurementId, {
     page_path: window.location.pathname,
+    cookie_domain: analyticsConfig.ga4CookieDomain,
   })
 }
 
